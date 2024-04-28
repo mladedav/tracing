@@ -369,6 +369,32 @@ impl<C, N, E, W> Subscriber<C, N, E, W> {
             _inner: self._inner,
         }
     }
+
+    /// Mutably borrows the [event formatter][`FormatEvent`] for this [`Layer`].
+    ///
+    /// This method is primarily expected to be used with the
+    /// [`reload::Handle::modify`](crate::reload::Handle::modify) method.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tracing::info;
+    /// # use tracing_subscriber::{fmt::{self,format::Format},reload,Registry,prelude::*};
+    /// # fn main() {
+    /// let subscriber = fmt::subscriber().event_format(Format::default().json().with_thread_ids(false));
+    /// let (subscriber, reload_handle) = reload::Subscriber::new(subscriber);
+    /// #
+    /// # // specifying the Registry type is required
+    /// # let _: &reload::Handle<fmt::Subscriber<Registry, _, _, _>> = &reload_handle;
+    /// #
+    /// info!("This will be logged without thread IDs");
+    /// reload_handle.modify(|subscriber| *subscriber.event_format_mut() = Format::default().json().with_thread_ids(true));
+    /// info!("This will be logged with thread IDs");
+    /// # }
+    /// ```
+    pub fn event_format_mut(&mut self) -> &mut E {
+        &mut self.fmt_event
+    }
 }
 
 impl<C, N, L, T, W> Subscriber<C, N, format::Format<L, T>, W>
